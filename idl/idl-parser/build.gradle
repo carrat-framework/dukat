@@ -1,23 +1,31 @@
+import org.gradle.api.internal.tasks.DefaultTaskDependency
+
 plugins {
     id 'antlr'
     id 'kotlin'
 }
 
-sourceSets {
-    generated {
-        java.srcDir "${buildDir}/generated-src/antlr/generated"
-    }
+//configurations {
+//    compileKotlin {
+//        extendsFrom = extendsFrom.findAll { it != configurations.antlr }
+//    }
+//}
 
-    main {
-        compileClasspath += generated.output
-        runtimeClasspath += generated.output
-    }
-
-    test {
-        compileClasspath += generated.output
-        runtimeClasspath += generated.output
-    }
-}
+//sourceSets {
+//    generated {
+//        java.srcDir "${buildDir}/generated-src/antlr/generated"
+//    }
+//
+//    main {
+//        compileClasspath += generated.output
+//        runtimeClasspath += generated.output
+//    }
+//
+//    test {
+//        compileClasspath += generated.output
+//        runtimeClasspath += generated.output
+//    }
+//}
 
 dependencies {
     antlr "org.antlr:antlr4:${gradle.antlr4_version}"
@@ -28,28 +36,40 @@ dependencies {
     implementation(project(":idl-reference-resolver"))
     implementation(project(":ast-common"))
 
-    runtime files(project.sourceSets.generated.output.classesDirs)
+//    runtime files(project.sourceSets.generated.output.classesDirs)
 }
 
 project.sourceSets.main.antlr.srcDirs = ["src/main/antlr4"]
+//project.sourceSets.main.kotlin.srcDirs += project.sourceSets.main.java.srcDirs
+//project.sourceSets.main.java.srcDirs = []
 
-task createGeneratedSourcesDir {
-    doFirst {
-        mkdir "${buildDir}/classes/kotlin/generated"
-    }
+compileKotlin.dependsOn(generateGrammarSource)
+
+compileKotlin.doFirst {
+
+    println project.sourceSets.main.kotlin.srcDirs
 }
 
-compileGeneratedJava {
-    dependsOn(createGeneratedSourcesDir)
-    dependsOn(generateGrammarSource)
-    classpath = configurations.compile
+task printD {
 }
 
-compileKotlin {
-    source += sourceSets.generated.java
-}
+//task createGeneratedSourcesDir {
+//    doFirst {
+//        mkdir "${buildDir}/classes/kotlin/generated"
+//    }
+//}
+
+//compileGeneratedJava {
+//    dependsOn(createGeneratedSourcesDir)
+//    dependsOn(generateGrammarSource)
+//    classpath = configurations.compile
+//}
+//
+//compileKotlin {
+//    source += sourceSets.generated.java
+//}
 
 generateGrammarSource {
-    outputDirectory = file("${buildDir}/generated-src/antlr/generated")
+//    outputDirectory = file("${buildDir}/generated-src/antlr/generated")
     arguments += ["-visitor", "-long-messages", "-package", "org.antlr.webidl"]
 }

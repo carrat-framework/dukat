@@ -1,8 +1,16 @@
+import org.gradle.api.artifacts.repositories.PasswordCredentials
+
 plugins {
   id "kotlin" apply false
+  id("maven-publish")
 }
 
 allprojects {
+  apply plugin: 'maven-publish'
+
+  group = "org.carrat.thirdparty.dukat"
+  version(gradle.defaultNpmPackageVersion)
+
   repositories {
     gradlePluginPortal()
     mavenCentral()
@@ -17,16 +25,16 @@ allprojects {
 
   afterEvaluate { project ->
     if (project.plugins.hasPlugin("kotlin")) {
+      project.sourceSets {
+        main.kotlin.srcDirs.removeIf { it.absolutePath == project.file('src/main/kotlin').absolutePath}
+        main.kotlin.srcDirs += 'src'
+
+        test.kotlin.srcDirs = ['test/src']
+        test.resources.srcDirs = ['test/data']
+      }
 
       test {
         useJUnitPlatform()
-      }
-
-      project.sourceSets {
-        main.kotlin.srcDirs = ['src']
-        
-        test.kotlin.srcDirs = ['test/src']
-        test.resources.srcDirs = ['test/data']
       }
 
       compileKotlin {
@@ -48,12 +56,40 @@ allprojects {
       }
     }
 
+    if (project.plugins.hasPlugin("kotlin")) {
+      apply plugin: 'java'
+    }
+
     if (project.plugins.hasPlugin("java")) {
       compileJava {
         sourceCompatibility = '1.6'
         targetCompatibility = '1.6'
       }
     }
+    if (project.plugins.hasPlugin("java")) {
+      java {
+        withSourcesJar()
+        withJavadocJar()
+      }
+
+      publishing {
+        publications {
+          mavenJava(MavenPublication) {
+            from components.java
+          }
+        }
+      }
+
+    }
   }
 
+  publishing {
+    repositories {
+      maven {
+        name = "carrat"
+        url = uri("https://carrat.jfrog.io/artifactory/carrat-dev/")
+        credentials(PasswordCredentials)
+      }
+    }
+  }
 }

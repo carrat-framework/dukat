@@ -74,13 +74,13 @@ bintray {
   }
 }
 
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      groupId "org.jetbrains.dukat"
-      artifactId "dukat"
-      version dukatVersion
-      artifact jar
-    }
-  }
-}
+//publishing {
+//  publications {
+//    mavenJava(MavenPublication) {
+//      groupId "org.jetbrains.dukat"
+//      artifactId "dukat"
+//      version dukatVersion
+//      artifact jar
+//    }
+//  }
+//}
